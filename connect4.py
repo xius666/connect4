@@ -13,7 +13,7 @@ WIDTH = 7
 width = WIDTH * SQUARESIZE
 height = HEIGHT* SQUARESIZE+SQUARESIZE
 size = (width, height)
-RADIUS = int(SQUARESIZE/2 - 5)
+R = int(SQUARESIZE/2 - 5)#radius for circle
 HUMAN = 'human'
 COMPUTER = 'computer'
 
@@ -35,6 +35,8 @@ def main(argv):
 				for event in pygame.event.get():
 					 # event handling loop
 					if event.type == pygame.QUIT:
+						pygame.quit()
+
 						sys.exit()
 					elif event.type == pygame.MOUSEBUTTONDOWN:#click to restart the game
 						board = make_board()
@@ -44,22 +46,22 @@ def main(argv):
 			# event handling loop
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
-					sys.exit()			
+					pygame.quit()
+					sys.exit()		
 				pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
 				if event.type == pygame.MOUSEMOTION:
 					posx = event.pos[0]
 					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), R)
 
 				pygame.display.update()
 
 				if event.type == pygame.MOUSEBUTTONDOWN:
-					#print(event.pos)
 					# Ask for Player  Input
 					if turn ==HUMAN:
 						posx = event.pos[0]
 						col = int(math.floor(posx/SQUARESIZE))
-						if is_valid_location(board, col):
+						if is_valid_move(board, col):
 							row = get_next_empty_row(board, col)
 							make_move(board, 1,row, col)#Human representation is 1
 							turn=COMPUTER
@@ -71,7 +73,7 @@ def main(argv):
 
 				#computer's turn
 				if turn ==COMPUTER:				
-					if is_valid_location(board, col):
+					if is_valid_move(board, col):
 						col=getComputerMove1(board)
 						row = get_next_empty_row(board, col)
 						make_move(board, 2,row, col)#computer representatin is 2
@@ -82,15 +84,15 @@ def main(argv):
 							winning=True
 							turn=HUMAN
 				draw_board(board,screen)
-				#print(board)
 	elif sys.argv[1]=="-player":
 		while True :
 			if is_full(board):
 				break
-			if winning:
+			if winning:#handle winning case
 				for event in pygame.event.get():
 					 # event handling loop
 					if event.type == pygame.QUIT:
+						pygame.quit()
 						sys.exit()
 					elif event.type == pygame.MOUSEBUTTONDOWN:#click to restart the game
 						board = make_board()
@@ -100,27 +102,29 @@ def main(argv):
 			# event handling loop
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					pygame.quit()
 					sys.exit()			
+				
 				pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+				
 				if event.type == pygame.MOUSEMOTION:
 					posx = event.pos[0]
 					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), RADIUS)
+						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), R)
 					else:
-						pygame.draw.circle(screen, BLUE, (posx, int(SQUARESIZE/2)), RADIUS)
+						pygame.draw.circle(screen, BLUE, (posx, int(SQUARESIZE/2)), R)
 				pygame.display.update()
 
 				if event.type == pygame.MOUSEBUTTONDOWN:
-					#print(event.pos)
-					# Ask for Player1   Input
+					# Ask for Player1 
 					if turn ==HUMAN:
 						posx = event.pos[0]#get the cursor position
 						col = int(math.floor(posx/SQUARESIZE))#change into column position
-						if is_valid_location(board, col):
+						if is_valid_move(board, col):
 							row = get_next_empty_row(board, col)
-							make_move(board, 1,row, col)#Human representation is 1
+							make_move(board, 1,row, col)#player1 representation is 1
 							turn=""
-							if is_winning(board, 1):#if human wins
+							if is_winning(board, 1):#if player1 wins
 								a =pygame.font.SysFont("monospace", 20).render("Player 1 wins,click to replay", 1, RED)
 								screen.blit(a, (50,10))
 								winning=True
@@ -130,11 +134,11 @@ def main(argv):
 					else:	
 							posx = event.pos[0]
 							col=int(math.floor(posx/SQUARESIZE))			
-							if is_valid_location(board, col):
+							if is_valid_move(board, col):
 								row = get_next_empty_row(board, col)
-								make_move(board, 2,row, col)#computer representatin is 2
+								make_move(board, 2,row, col)#player2 representatin is 2
 								turn=HUMAN
-								if is_winning(board, 2):
+								if is_winning(board, 2):#if player2 wins
 									a =  pygame.font.SysFont("monospace", 20).render("player2 wins,click to replay", 1, BLUE)
 									screen.blit(a, (50,10))
 									winning=True
@@ -161,7 +165,7 @@ def is_full(board):
 				return False
 	return True
 
-def is_valid_location(board, col):
+def is_valid_move(board, col):#check if it is valid move
 	if col < 0 or col >= WIDTH or board[HEIGHT-1][col] != 0:
 		return False
 	return True
@@ -175,13 +179,13 @@ def get_next_empty_row(board, col):
 
 def is_winning(board, player_type):
 
-	# Check vertical locations
+	# Check vertical 
 	for c in range(WIDTH):
 		for r in range(HEIGHT-3):
 			if board[r][c] == player_type and board[r+1][c] == player_type and board[r+2][c] == player_type and board[r+3][c] == player_type:
 				return True
 
-	# Check horizontal locations
+	# Check horizontal 
 	for c in range(WIDTH-3):
 		for r in range(HEIGHT):
 			if board[r][c] == player_type and board[r][c+1] == player_type and board[r][c+2] == player_type and board[r][c+3] == player_type:
@@ -202,18 +206,17 @@ def is_winning(board, player_type):
 def draw_board(board,screen):
 	for c in range(WIDTH):
 		for r in range(HEIGHT):
-			pygame.draw.rect(screen, GREEN, (c*SQUARESIZE, r*SQUARESIZE+SQUARESIZE, SQUARESIZE, SQUARESIZE))
+			pygame.draw.rect(screen, GREEN, (c*SQUARESIZE, (r+1)*SQUARESIZE, SQUARESIZE, SQUARESIZE))
 
-			pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), RADIUS)
+			pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), R)
 	
 	for c in range(WIDTH):
 		for r in range(HEIGHT):	
 
 			if board[r][c] == 1:
-				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
-			
+				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), R)
 			elif board[r][c] == 2: 
-				pygame.draw.circle(screen, BLUE, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), RADIUS)
+				pygame.draw.circle(screen, BLUE, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), R)
 	
 	pygame.display.update()
 
@@ -240,7 +243,7 @@ def getPossibleMoves1(board, player_type):
 	moves_value=np.zeros(WIDTH)
 	for m in range(WIDTH):
 		temp_board=copy.deepcopy(board)
-		if not is_valid_location(board,m):
+		if not is_valid_move(board,m):
 			continue
 		r=get_next_empty_row(temp_board,m)
 		make_move(temp_board,player_type,r,m)
@@ -253,7 +256,7 @@ def getPossibleMoves1(board, player_type):
 			else:
 				for enemy_move in range(WIDTH):
 					temp_board2=copy.deepcopy(temp_board)
-					if not is_valid_location(temp_board2,enemy_move):
+					if not is_valid_move(temp_board2,enemy_move):
 						continue
 					r2=get_next_empty_row(temp_board2,enemy_move)
 					make_move(temp_board2,enemy,r2,enemy_move)
