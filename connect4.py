@@ -19,76 +19,24 @@ COMPUTER = 'computer'
 
 
 def main(argv):
-		
 	board = make_board()
+	a=is_full(board)
 	turn = HUMAN
 	pygame.init()
 	screen = pygame.display.set_mode(size)
 	draw_board(board,screen)
 	pygame.display.update()
-	winning=False
 	if sys.argv[1]=="-AI1":
-		while True :
-			if is_full(board):
-				break
-			if winning:
-				for event in pygame.event.get():
-					 # event handling loop
-					if event.type == pygame.QUIT:
-						pygame.quit()
-
-						sys.exit()
-					elif event.type == pygame.MOUSEBUTTONDOWN:#click to restart the game
-						board = make_board()
-						draw_board(board,screen)
-						pygame.display.update()
-						winning=False
-			# event handling loop
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					pygame.quit()
-					sys.exit()		
-				pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
-				if event.type == pygame.MOUSEMOTION:
-					posx = event.pos[0]
-					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), R)
-
-				pygame.display.update()
-
-				if event.type == pygame.MOUSEBUTTONDOWN:
-					# Ask for Player  Input
-					if turn ==HUMAN:
-						posx = event.pos[0]
-						col = int(math.floor(posx/SQUARESIZE))
-						if is_valid_move(board, col):
-							row = get_next_empty_row(board, col)
-							make_move(board, 1,row, col)#Human representation is 1
-							turn=COMPUTER
-							if is_winning(board, 1):#if human wins
-								a =pygame.font.SysFont("monospace", 20).render("Player wins,click to replay", 1, RED)
-								screen.blit(a, (50,10))
-								winning=True
-								turn=HUMAN
-
-				#computer's turn
-				if turn ==COMPUTER:				
-					if is_valid_move(board, col):
-						col=getComputerMove1(board)
-						row = get_next_empty_row(board, col)
-						make_move(board, 2,row, col)#computer representatin is 2
-						turn=HUMAN
-						if is_winning(board, 2):
-							a =  pygame.font.SysFont("monospace", 20).render("COMPUTER wins,click to replay", 1, BLUE)
-							screen.blit(a, (50,10))
-							winning=True
-							turn=HUMAN
-				draw_board(board,screen)
+		play_game(board,screen,sys.argv[1])
+	elif sys.argv[1]=="-random":
+		play_game(board,screen,sys.argv[1])
+	elif sys.argv[1]=="-AI2":
+		play_game(board,screen,sys.argv[1])
 	elif sys.argv[1]=="-player":
+		winning=False
 		while True :
-			if is_full(board):
-				break
-			if winning:#handle winning case
+			
+			if winning or is_full(board):#handle winning case
 				for event in pygame.event.get():
 					 # event handling loop
 					if event.type == pygame.QUIT:
@@ -146,7 +94,73 @@ def main(argv):
 					draw_board(board,screen)
 
 
+def play_game(board,screen,difficulty):
+	winning=False
+	turn = HUMAN
 
+	while True :
+			if is_full(board):
+				break
+			if winning:
+				for event in pygame.event.get():
+					 # event handling loop
+					if event.type == pygame.QUIT:
+						pygame.quit()
+
+						sys.exit()
+					elif event.type == pygame.MOUSEBUTTONDOWN:#click to restart the game
+						board = make_board()
+						draw_board(board,screen)
+						pygame.display.update()
+						winning=False
+			# event handling loop
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					sys.exit()		
+				pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+				if event.type == pygame.MOUSEMOTION:
+					posx = event.pos[0]
+					if turn == HUMAN and winning==False:
+						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), R)
+
+				pygame.display.update()
+
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					# Ask for Player  Input
+					if turn ==HUMAN:
+						posx = event.pos[0]
+						col = int(math.floor(posx/SQUARESIZE))
+						if is_valid_move(board, col):
+							row = get_next_empty_row(board, col)
+							make_move(board, 1,row, col)#Human representation is 1
+							turn=COMPUTER
+							if is_winning(board, 1):#if human wins
+								a =pygame.font.SysFont("monospace", 20).render("Player wins,click to replay", 1, RED)
+								screen.blit(a, (50,10))
+								winning=True
+								turn=HUMAN
+
+				#computer's turn
+				if turn ==COMPUTER:				
+			
+					if difficulty=="-AI1":#AI version 1
+						col=getComputerMove1(board)
+					elif difficulty=="-AI2":#AI version2 
+						col=getComputerMove2(board)
+					elif difficulty=="-random":
+						col=randomComputer(board)
+					if is_valid_move(board, col):
+						row = get_next_empty_row(board, col)
+
+						make_move(board, 2,row, col)#computer representatin is 2
+						turn=HUMAN
+						if is_winning(board, 2):
+							a =  pygame.font.SysFont("monospace", 20).render("COMPUTER wins,click to replay", 1, BLUE)
+							screen.blit(a, (50,10))
+							winning=True
+							turn=HUMAN
+				draw_board(board,screen)
 
 def make_move(board, player_type,row, col):
 	board[row][col] = player_type
@@ -155,13 +169,14 @@ def make_board():
 	w=WIDTH
 	h=HEIGHT
 	board_matrix = [[0 for x in range(w)] for y in range(h)]
+	
 	return board_matrix
 
 
 def is_full(board):
 	for x in range(WIDTH):
 		for y in range(HEIGHT):
-			if board[x][y] == 0:
+			if board[y][x] == 0:
 				return False
 	return True
 
@@ -221,9 +236,24 @@ def draw_board(board,screen):
 	pygame.display.update()
 
 
+def legal_moves(board):
+        # Return legal moves that for next player.
+        legal = []
+        for i in range(len(board[0])):
+        	if( board[0][i] == 0 ):
+        		legal.append(i)
+        return legal
+
+
+def randomComputer(board):#stupid player 
+	#reutrn random comupter move
+	move=random.randint(0,6)
+	return move
+
+
 def getComputerMove1(board):
 	possible_moves = getPossibleMoves1(board, 2)
-	bestMoveValue = -1000#initialise value
+	bestMoveValue = -10000#initialise value
 	bestMoves = []
 	for i in range(WIDTH):
 		if possible_moves[i] > bestMoveValue:
@@ -248,12 +278,10 @@ def getPossibleMoves1(board, player_type):
 		r=get_next_empty_row(temp_board,m)
 		make_move(temp_board,player_type,r,m)
 		if is_winning(temp_board,player_type):#if winning move it gets 100 score
-			moves_value[m]=100
+			moves_value[m]+=100
 			break
 		else:#look at other player's counter move 
-			if is_full(temp_board):
-				moves_value[m] = 0
-			else:
+
 				for enemy_move in range(WIDTH):
 					temp_board2=copy.deepcopy(temp_board)
 					if not is_valid_move(temp_board2,enemy_move):
@@ -261,13 +289,80 @@ def getPossibleMoves1(board, player_type):
 					r2=get_next_empty_row(temp_board2,enemy_move)
 					make_move(temp_board2,enemy,r2,enemy_move)
 					if is_winning(temp_board2,enemy):
-						moves_value[m]=-1000#if this move make oppenent win give it a worst score
+						moves_value[m]-=1000#if this move make oppenent win give it a worst score
 						break
 					else:
 						moves_value[m]+=50
 	print(moves_value)
 	return moves_value 
 
+
+#potential move for the AI using the first method that look two steps ahead(medium level difficulty)
+def getComputerMove2(board):
+	possible_moves = getPossibleMoves2(board, 2)
+	bestMoveValue = -10000#initialise value
+	bestMoves = []
+	for i in range(WIDTH):
+		if possible_moves[i] > bestMoveValue:
+			bestMoveValue = possible_moves[i]
+	for i in range(len(possible_moves)):
+		if possible_moves[i] == bestMoveValue:
+			bestMoves.append(i)
+	return random.choice(bestMoves)
+
+def getPossibleMoves2(board, player_type):
+
+	if player_type==1:
+		enemy=2
+	else:
+		enemy=1
+	moves_value=np.zeros(WIDTH)
+	for m in range(WIDTH):
+		temp_board=copy.deepcopy(board)
+		if not is_valid_move(board,m):
+			continue
+		r=get_next_empty_row(temp_board,m)
+		make_move(temp_board,player_type,r,m)
+		if is_winning(temp_board,player_type):#if winning move it gets 100 score
+			moves_value[m]+=1000
+			break
+		else:#look at other player's counter move 
+
+				for enemy_move in range(WIDTH):
+					temp_board2=copy.deepcopy(temp_board)
+					if not is_valid_move(temp_board2,enemy_move):
+						continue
+					r2=get_next_empty_row(temp_board2,enemy_move)
+					make_move(temp_board2,enemy,r2,enemy_move)
+					if is_winning(temp_board2,enemy):
+						moves_value[m]-=1000#if this move make oppenent win give it a worst score
+						break
+					else:
+						moves_value[m]+=50
+						for move in range(WIDTH):
+							temp_board3=copy.deepcopy(temp_board2)
+							if not is_valid_move(temp_board3,move):
+								continue
+							r3=get_next_empty_row(temp_board3,move)
+							make_move(temp_board3,player_type,r3,move)
+							if is_winning(temp_board3,player_type):#if winning move it gets 100 score
+								moves_value[m]+=100
+								break
+							else:
+									for enemy_move in range(WIDTH):
+										temp_board4=copy.deepcopy(temp_board3)
+										if not is_valid_move(temp_board4,enemy_move):
+											continue
+										r4=get_next_empty_row(temp_board4,enemy_move)
+										make_move(temp_board4,enemy,r4,enemy_move)
+										if is_winning(temp_board4,enemy):
+											moves_value[m]-=100#if this move make oppenent win give it a worst score
+											break
+										else:
+	
+											moves_value[m]+=10
+	print(moves_value)
+	return moves_value 
 
 
 if __name__ == '__main__':
