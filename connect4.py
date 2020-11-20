@@ -283,7 +283,6 @@ def getPossibleMoves1(board, player_type):
 		else:#look at other player's counter move 
 			if is_full(board):
 				moves_value+=10
-			moves_value[m]+=50
 			for enemy_move in range(WIDTH):
 				temp_board2=copy.deepcopy(temp_board)
 				if not is_valid_move(temp_board2,enemy_move):
@@ -329,44 +328,45 @@ def getPossibleMoves2(board, player_type):
 			moves_value[m]+=1000
 			break
 		else:#look at other player's counter move 
+			if is_full(board):
+				moves_value+=10
+			for enemy_move in range(WIDTH):
+				temp_board2=copy.deepcopy(temp_board)
+				if not is_valid_move(temp_board2,enemy_move):
+					continue
+				r2=get_next_empty_row(temp_board2,enemy_move)
+				make_move(temp_board2,enemy,r2,enemy_move)
+				if is_winning(temp_board2,enemy):
+					moves_value[m]-=1000#if this move make oppenent win give it a worst score
+					break
+				else:
+					if is_full(temp_board2):
+						moves_value[m]+=10
+					moves_value[m]+=50
+					for move in range(WIDTH):
+						temp_board3=copy.deepcopy(temp_board2)
+						if not is_valid_move(temp_board3,move):
+							continue
+						r3=get_next_empty_row(temp_board3,move)
+						make_move(temp_board3,player_type,r3,move)
+						if is_winning(temp_board3,player_type):#if winning move it gets 100 score
+							moves_value[m]+=100
+							break
+						else:
+							if is_full(temp_board3):
+								moves_value[m]+=10
+							for enemy_move in range(WIDTH):
+								temp_board4=copy.deepcopy(temp_board3)
+								if not is_valid_move(temp_board4,enemy_move):
+									continue
+								r4=get_next_empty_row(temp_board4,enemy_move)
+								make_move(temp_board4,enemy,r4,enemy_move)
+								if is_winning(temp_board4,enemy):
+									moves_value[m]-=100#if this move make oppenent win give it a worst score
+									break
+								else:
 
-				for enemy_move in range(WIDTH):
-					temp_board2=copy.deepcopy(temp_board)
-					if not is_valid_move(temp_board2,enemy_move):
-						continue
-					r2=get_next_empty_row(temp_board2,enemy_move)
-					make_move(temp_board2,enemy,r2,enemy_move)
-					if is_winning(temp_board2,enemy):
-						moves_value[m]-=1000#if this move make oppenent win give it a worst score
-						break
-					else:
-						if is_full(board):
-							moves_value[m]+=10
-						moves_value[m]+=50
-						for move in range(WIDTH):
-							temp_board3=copy.deepcopy(temp_board2)
-							if not is_valid_move(temp_board3,move):
-								continue
-							r3=get_next_empty_row(temp_board3,move)
-							make_move(temp_board3,player_type,r3,move)
-							if is_winning(temp_board3,player_type):#if winning move it gets 100 score
-								moves_value[m]+=100
-								break
-							else:
-								if is_full(board):
 									moves_value[m]+=10
-								for enemy_move in range(WIDTH):
-									temp_board4=copy.deepcopy(temp_board3)
-									if not is_valid_move(temp_board4,enemy_move):
-										continue
-									r4=get_next_empty_row(temp_board4,enemy_move)
-									make_move(temp_board4,enemy,r4,enemy_move)
-									if is_winning(temp_board4,enemy):
-										moves_value[m]-=100#if this move make oppenent win give it a worst score
-										break
-									else:
-
-										moves_value[m]+=10
 	print(moves_value)
 	return moves_value 
 
