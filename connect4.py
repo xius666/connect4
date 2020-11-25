@@ -2,6 +2,8 @@ import numpy as np
 import pygame
 import sys,copy,random
 import math
+from random import shuffle
+from copy import deepcopy
 
 GREEN = (0,255,0)
 BLACK = (0,0,0)
@@ -31,6 +33,8 @@ def main(argv):
 	elif sys.argv[1]=="-random":
 		play_game(board,screen,sys.argv[1])
 	elif sys.argv[1]=="-AI2":
+		play_game(board,screen,sys.argv[1])
+	elif sys.argv[1]=="-MINI":
 		play_game(board,screen,sys.argv[1])
 	elif sys.argv[1]=="-player":
 		winning=False
@@ -148,6 +152,8 @@ def play_game(board,screen,difficulty):
 						col=getComputerMove1(board)
 					elif difficulty=="-AI2":#AI version2 
 						col=getComputerMove2(board)
+					elif difficulty=="-MINI":
+						col=mini_max(board, 4, 2)[0]
 					elif difficulty=="-random":
 						col=randomComputer(board)
 					if is_valid_move(board, col):
@@ -181,6 +187,8 @@ def is_full(board):
 	return True
 
 def is_valid_move(board, col):#check if it is valid move
+	# print(col)
+	# print(board)
 	if col < 0 or col >= WIDTH or board[HEIGHT-1][col] != 0:
 		return False
 	return True
@@ -298,7 +306,7 @@ def getPossibleMoves1(board, player_type):
 	return moves_value 
 
 
-#potential move for the AI using the first method that look two steps ahead(medium level difficulty)
+#potential move for the AI using the first method that look two steps ahead(haard level difficulty)
 def getComputerMove2(board):
 	possible_moves = getPossibleMoves2(board, 2)
 	bestMoveValue = -10000#initialise value
@@ -369,6 +377,54 @@ def getPossibleMoves2(board, player_type):
 									moves_value[m]+=10
 	print(moves_value)
 	return moves_value 
+
+def mini_max(board, depth, player_type):#almost done not yet there
+	valid_moves = []
+	for i in range(WIDTH):
+		if is_valid_move(board, i):
+			valid_moves.append(i)
+	shuffle(valid_moves)
+	if player_type==1:
+		enemy=2
+	else:
+		enemy=1
+	best_score = float("-inf")
+	if depth==0 or is_full(board):#recursion stop condition
+			if is_winning(board,2):
+				return (None,1000000);
+			elif is_winning(board,1):
+				return (None,-1000000);
+			else:
+				return (None,50)
+
+	if player_type==2:#computer move
+		v=float("-inf")
+		best_move = valid_moves[0]
+		for move in valid_moves:
+			row=get_next_empty_row(board,move)
+			tempBoard=copy.deepcopy(board)
+			make_move(tempBoard,2,row,move)
+			# print(temp_board5)
+			board_score = mini_max(tempBoard, depth-1,2)[1]
+			if board_score> v:
+				v = board_score
+				best_move = move
+
+		return (best_move,v)
+
+	else:
+		v=float("inf")
+		best_move = valid_moves[0]
+		for move in valid_moves:
+			row=get_next_empty_row(board,move)
+			tempBoard=copy.deepcopy(board)
+			make_move(tempBoard,1,row,move)
+			# print(temp_board5)
+			board_score = mini_max(tempBoard, depth-1,1)[1]
+			if board_score> v:
+				v = board_score
+				best_move = move
+		return (best_move,v)
 
 
 if __name__ == '__main__':
