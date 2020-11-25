@@ -40,39 +40,40 @@ def main(argv):
 	elif sys.argv[1]=="-player":
 		winning=False
 		while True :
-			
 			if winning or is_full(board):#handle winning case
 				for event in pygame.event.get():
 					 # event handling loop
 					if event.type == pygame.QUIT:
 						pygame.quit()
 						sys.exit()
-					elif event.type == pygame.MOUSEBUTTONDOWN:#click to restart the game
+					elif event.type == pygame.MOUSEBUTTONUP:#click to restart the game
 						board = make_board()
 						draw_board(board,screen)
 						pygame.display.update()
 						winning=False
 			# event handling loop
 			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
+				dim=(0, 0, width, SQUARE)
+				pygame.draw.rect(screen, (0,0,0),dim)
+				if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or event.type == pygame.QUIT:
 					pygame.quit()
 					sys.exit()			
 				
-				pygame.draw.rect(screen, WHITE, (0, 0, width, SQUARE))
-				
 				if event.type == pygame.MOUSEMOTION:#when cursor is moved draw the circle!
-					posx = event.pos[0]
+					x = event.pos[0]
+					pos=(x,R)
 					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, R), R)
+						pygame.draw.circle(screen, RED, pos, R)
+						pygame.display.update()
 					else:
-						pygame.draw.circle(screen, BLUE, (posx, R), R)
-				pygame.display.update()
+						pygame.draw.circle(screen, BLUE, pos, R)
+						pygame.display.update()
 
-				if event.type == pygame.MOUSEBUTTONDOWN:
-					# Ask for Player1 
+				if event.type == pygame.MOUSEBUTTONUP:
+					#  Player1 inpput 
 					if turn ==HUMAN:
-						posx = event.pos[0]#get the cursor position
-						col = int(math.floor(posx/SQUARE))#change into column position
+						x = event.pos[0]#get the cursor position
+						col = math.floor(x/SQUARE)#change into column position
 						make_move(board, 1, col)#player1 representation is 1
 						turn=""
 						if is_winning(board, 1):#if player1 wins
@@ -83,8 +84,8 @@ def main(argv):
 
 					#player2 's turn
 					else:	
-						posx = event.pos[0]
-						col=int(math.floor(posx/SQUARE))			
+						x = event.pos[0]
+						col=math.floor(x/SQUARE)			
 						make_move(board, 2, col)#player2 representatin is 2
 						turn=HUMAN
 						if is_winning(board, 2):#if player2 wins
@@ -109,39 +110,38 @@ def play_game(board,screen,difficulty):
 						pygame.quit()
 
 						sys.exit()
-					elif event.type == pygame.MOUSEBUTTONDOWN:#click to restart the game
+					elif event.type == pygame.MOUSEBUTTONUP:#click to restart the game
 						board = make_board()
 						draw_board(board,screen)
 						pygame.display.update()
 						winning=False
 			# event handling loop
 			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
+				dim=(0, 0, width, SQUARE)
+				pygame.draw.rect(screen, (0,0,0),dim)
+				if (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE) or event.type == pygame.QUIT:
 					pygame.quit()
 					sys.exit()		
-				pygame.draw.rect(screen, WHITE, (0, 0, width, SQUARE))
 				if event.type == pygame.MOUSEMOTION:
-					posx = event.pos[0]
+					x = event.pos[0]
+					pos=(x,R)
 					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, R), R)
+						pygame.draw.circle(screen, RED, pos, R)
+						pygame.display.update()
 
-				pygame.display.update()
-
-				if event.type == pygame.MOUSEBUTTONDOWN:
-					# Ask for Player  Input
-					if turn ==HUMAN:
-						posx = event.pos[0]
-						col = int(math.floor(posx/SQUARE))
-						make_move(board, 1, col)#Human representation is 1
-						turn=COMPUTER
-						if is_winning(board, 1):#if human wins
-							a =pygame.font.SysFont("arial", 20).render("Player wins,click to replay", 1, RED)
-							screen.blit(a, (50,10))
-							winning=True
-							turn=HUMAN
+				if event.type == pygame.MOUSEBUTTONUP:
+					x = event.pos[0]
+					col = math.floor(x/SQUARE)
+					make_move(board, 1, col)#Human representation is 1
+					turn=COMPUTER
+					if is_winning(board, 1):#if human wins
+						a =pygame.font.SysFont("arial", 20).render("Player wins,click to replay", 1, RED)
+						screen.blit(a, (50,10))
+						winning=True
+						turn=HUMAN
 
 				#computer's turn
-				if turn ==COMPUTER:				
+				if turn==COMPUTER:				
 			
 					if difficulty=="-AI1":#AI version 1
 						col=getComputerMove1(board)
@@ -195,7 +195,7 @@ def is_valid_move(board, col):#check if it is valid move
 
 
 def is_winning(board, player_type):
-
+	#check for the winning state
 	# Check vertical 
 	for c in range(WIDTH):
 		for r in range(HEIGHT-3):
@@ -208,13 +208,13 @@ def is_winning(board, player_type):
 			if board[r][c] == player_type and board[r][c+1] == player_type and board[r][c+2] == player_type and board[r][c+3] == player_type:
 				return True
 
-	# Check / diaganols
+	# Check diaganols
 	for c in range(WIDTH-3):
 		for r in range(HEIGHT-3):
 			if board[r][c] == player_type and board[r+1][c+1] == player_type and board[r+2][c+2] == player_type and board[r+3][c+3] == player_type:
 				return True
 
-	# Check \ diaganols
+	# Check diaganols
 	for c in range(WIDTH-3):
 		for r in range(3, HEIGHT):
 			if board[r][c] == player_type and board[r-1][c+1] == player_type and board[r-2][c+2] == player_type and board[r-3][c+3] == player_type:
