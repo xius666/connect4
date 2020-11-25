@@ -5,17 +5,18 @@ import math
 from random import shuffle
 from copy import deepcopy
 
+#gloable variable
 GREEN = (0,255,0)
-BLACK = (0,0,0)
+WHITE = (255, 255, 250)
 RED = (255,0,0)
 BLUE = (0,0,255)
-SQUARESIZE = 80
+SQUARE = 80
 HEIGHT = 6
 WIDTH = 7
-width = WIDTH * SQUARESIZE
-height = HEIGHT* SQUARESIZE+SQUARESIZE
+width = WIDTH * SQUARE
+height = HEIGHT* SQUARE+SQUARE
 size = (width, height)
-R = int(SQUARESIZE/2 - 5)#radius for circle
+R = int(SQUARE/2)#radius for circle
 HUMAN = 'human'
 COMPUTER = 'computer'
 
@@ -23,7 +24,7 @@ COMPUTER = 'computer'
 def main(argv):
 	board = make_board()
 	a=is_full(board)
-	turn = HUMAN
+	turn = HUMAN#start with HUMAN player
 	pygame.init()
 	screen = pygame.display.set_mode(size)
 	draw_board(board,screen)
@@ -57,44 +58,40 @@ def main(argv):
 					pygame.quit()
 					sys.exit()			
 				
-				pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+				pygame.draw.rect(screen, WHITE, (0, 0, width, SQUARE))
 				
-				if event.type == pygame.MOUSEMOTION:
+				if event.type == pygame.MOUSEMOTION:#when cursor is moved draw the circle!
 					posx = event.pos[0]
 					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), R)
+						pygame.draw.circle(screen, RED, (posx, R), R)
 					else:
-						pygame.draw.circle(screen, BLUE, (posx, int(SQUARESIZE/2)), R)
+						pygame.draw.circle(screen, BLUE, (posx, R), R)
 				pygame.display.update()
 
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					# Ask for Player1 
 					if turn ==HUMAN:
 						posx = event.pos[0]#get the cursor position
-						col = int(math.floor(posx/SQUARESIZE))#change into column position
-						if is_valid_move(board, col):
-							row = get_next_empty_row(board, col)
-							make_move(board, 1,row, col)#player1 representation is 1
-							turn=""
-							if is_winning(board, 1):#if player1 wins
-								a =pygame.font.SysFont("monospace", 20).render("Player 1 wins,click to replay", 1, RED)
-								screen.blit(a, (50,10))
-								winning=True
-								turn=HUMAN
+						col = int(math.floor(posx/SQUARE))#change into column position
+						make_move(board, 1, col)#player1 representation is 1
+						turn=""
+						if is_winning(board, 1):#if player1 wins
+							a =pygame.font.SysFont("arial", 20).render("Player 1 wins,click to replay", 1, RED)
+							screen.blit(a, (50,10))
+							winning=True
+							turn=HUMAN
 
 					#player2 's turn
 					else:	
-							posx = event.pos[0]
-							col=int(math.floor(posx/SQUARESIZE))			
-							if is_valid_move(board, col):
-								row = get_next_empty_row(board, col)
-								make_move(board, 2,row, col)#player2 representatin is 2
-								turn=HUMAN
-								if is_winning(board, 2):#if player2 wins
-									a =  pygame.font.SysFont("monospace", 20).render("player2 wins,click to replay", 1, BLUE)
-									screen.blit(a, (50,10))
-									winning=True
-									turn=HUMAN
+						posx = event.pos[0]
+						col=int(math.floor(posx/SQUARE))			
+						make_move(board, 2, col)#player2 representatin is 2
+						turn=HUMAN
+						if is_winning(board, 2):#if player2 wins
+							a =  pygame.font.SysFont("arial", 20).render("player2 wins,click to replay", 1, BLUE)
+							screen.blit(a, (50,10))
+							winning=True
+							turn=HUMAN
 					draw_board(board,screen)
 
 
@@ -122,11 +119,11 @@ def play_game(board,screen,difficulty):
 				if event.type == pygame.QUIT:
 					pygame.quit()
 					sys.exit()		
-				pygame.draw.rect(screen, BLACK, (0, 0, width, SQUARESIZE))
+				pygame.draw.rect(screen, WHITE, (0, 0, width, SQUARE))
 				if event.type == pygame.MOUSEMOTION:
 					posx = event.pos[0]
 					if turn == HUMAN and winning==False:
-						pygame.draw.circle(screen, RED, (posx, int(SQUARESIZE/2)), R)
+						pygame.draw.circle(screen, RED, (posx, R), R)
 
 				pygame.display.update()
 
@@ -134,16 +131,14 @@ def play_game(board,screen,difficulty):
 					# Ask for Player  Input
 					if turn ==HUMAN:
 						posx = event.pos[0]
-						col = int(math.floor(posx/SQUARESIZE))
-						if is_valid_move(board, col):
-							row = get_next_empty_row(board, col)
-							make_move(board, 1,row, col)#Human representation is 1
-							turn=COMPUTER
-							if is_winning(board, 1):#if human wins
-								a =pygame.font.SysFont("monospace", 20).render("Player wins,click to replay", 1, RED)
-								screen.blit(a, (50,10))
-								winning=True
-								turn=HUMAN
+						col = int(math.floor(posx/SQUARE))
+						make_move(board, 1, col)#Human representation is 1
+						turn=COMPUTER
+						if is_winning(board, 1):#if human wins
+							a =pygame.font.SysFont("arial", 20).render("Player wins,click to replay", 1, RED)
+							screen.blit(a, (50,10))
+							winning=True
+							turn=HUMAN
 
 				#computer's turn
 				if turn ==COMPUTER:				
@@ -157,19 +152,23 @@ def play_game(board,screen,difficulty):
 					elif difficulty=="-random":
 						col=randomComputer(board)
 					if is_valid_move(board, col):
-						row = get_next_empty_row(board, col)
-
-						make_move(board, 2,row, col)#computer representatin is 2
+						make_move(board, 2, col)#computer representatin is 2
 						turn=HUMAN
 						if is_winning(board, 2):
-							a =  pygame.font.SysFont("monospace", 20).render("COMPUTER wins,click to replay", 1, BLUE)
+							a =  pygame.font.SysFont("arial", 20).render("COMPUTER wins,click to replay", 1, BLUE)
 							screen.blit(a, (50,10))
 							winning=True
 							turn=HUMAN
 				draw_board(board,screen)
 
-def make_move(board, player_type,row, col):
-	board[row][col] = player_type
+
+
+
+def make_move(board, player_type,col):
+	for row in range(HEIGHT):
+		if board[row][col] == 0:
+			board[row][col] = player_type
+			return
 
 def make_board():
 	w=WIDTH
@@ -193,11 +192,6 @@ def is_valid_move(board, col):#check if it is valid move
 		return False
 	return True
 	 
-
-def get_next_empty_row(board, col):
-	for r in range(HEIGHT):
-		if board[r][col] == 0:
-			return r
 
 
 def is_winning(board, player_type):
@@ -226,20 +220,20 @@ def is_winning(board, player_type):
 			if board[r][c] == player_type and board[r-1][c+1] == player_type and board[r-2][c+2] == player_type and board[r-3][c+3] == player_type:
 				return True
 
-def draw_board(board,screen):
+def draw_board(board,screen):#this function was the idea by https://github.com/KeithGalli/Connect4-Python/blob/master/connect4.py
 	for c in range(WIDTH):
 		for r in range(HEIGHT):
-			pygame.draw.rect(screen, GREEN, (c*SQUARESIZE, (r+1)*SQUARESIZE, SQUARESIZE, SQUARESIZE))
+			pygame.draw.rect(screen, GREEN, (c*SQUARE, (r+1)*SQUARE, SQUARE, SQUARE))
 
-			pygame.draw.circle(screen, BLACK, (int(c*SQUARESIZE+SQUARESIZE/2), int(r*SQUARESIZE+SQUARESIZE+SQUARESIZE/2)), R)
+			pygame.draw.circle(screen, WHITE, (int(c*SQUARE+SQUARE/2), int(r*SQUARE+SQUARE+SQUARE/2)), R)
 	
 	for c in range(WIDTH):
 		for r in range(HEIGHT):	
 
 			if board[r][c] == 1:
-				pygame.draw.circle(screen, RED, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), R)
+				pygame.draw.circle(screen, RED, (int(c*SQUARE+SQUARE/2), height-int(r*SQUARE+SQUARE/2)), R)
 			elif board[r][c] == 2: 
-				pygame.draw.circle(screen, BLUE, (int(c*SQUARESIZE+SQUARESIZE/2), height-int(r*SQUARESIZE+SQUARESIZE/2)), R)
+				pygame.draw.circle(screen, BLUE, (int(c*SQUARE+SQUARE/2), height-int(r*SQUARE+SQUARE/2)), R)
 	
 	pygame.display.update()
 
@@ -283,8 +277,7 @@ def getPossibleMoves1(board, player_type):
 		temp_board=copy.deepcopy(board)
 		if not is_valid_move(board,m):
 			continue
-		r=get_next_empty_row(temp_board,m)
-		make_move(temp_board,player_type,r,m)
+		make_move(temp_board,player_type,m)
 		if is_winning(temp_board,player_type):#if winning move it gets 100 score
 			moves_value[m]+=100
 			break
@@ -295,8 +288,7 @@ def getPossibleMoves1(board, player_type):
 				temp_board2=copy.deepcopy(temp_board)
 				if not is_valid_move(temp_board2,enemy_move):
 					continue
-				r2=get_next_empty_row(temp_board2,enemy_move)
-				make_move(temp_board2,enemy,r2,enemy_move)
+				make_move(temp_board2,enemy,enemy_move)
 				if is_winning(temp_board2,enemy):
 					moves_value[m]-=1000#if this move make oppenent win give it a worst score
 					break
@@ -330,8 +322,7 @@ def getPossibleMoves2(board, player_type):
 		temp_board=copy.deepcopy(board)
 		if not is_valid_move(board,m):
 			continue
-		r=get_next_empty_row(temp_board,m)
-		make_move(temp_board,player_type,r,m)
+		make_move(temp_board,player_type,m)
 		if is_winning(temp_board,player_type):#if winning move it gets 100 score
 			moves_value[m]+=1000
 			break
@@ -342,8 +333,7 @@ def getPossibleMoves2(board, player_type):
 				temp_board2=copy.deepcopy(temp_board)
 				if not is_valid_move(temp_board2,enemy_move):
 					continue
-				r2=get_next_empty_row(temp_board2,enemy_move)
-				make_move(temp_board2,enemy,r2,enemy_move)
+				make_move(temp_board2,enemy,enemy_move)
 				if is_winning(temp_board2,enemy):
 					moves_value[m]-=1000#if this move make oppenent win give it a worst score
 					break
@@ -355,8 +345,7 @@ def getPossibleMoves2(board, player_type):
 						temp_board3=copy.deepcopy(temp_board2)
 						if not is_valid_move(temp_board3,move):
 							continue
-						r3=get_next_empty_row(temp_board3,move)
-						make_move(temp_board3,player_type,r3,move)
+						make_move(temp_board3,player_type,move)
 						if is_winning(temp_board3,player_type):#if winning move it gets 100 score
 							moves_value[m]+=100
 							break
@@ -367,8 +356,7 @@ def getPossibleMoves2(board, player_type):
 								temp_board4=copy.deepcopy(temp_board3)
 								if not is_valid_move(temp_board4,enemy_move):
 									continue
-								r4=get_next_empty_row(temp_board4,enemy_move)
-								make_move(temp_board4,enemy,r4,enemy_move)
+								make_move(temp_board4,enemy,enemy_move)
 								if is_winning(temp_board4,enemy):
 									moves_value[m]-=100#if this move make oppenent win give it a worst score
 									break
@@ -401,9 +389,8 @@ def mini_max(board, depth, player_type):#almost done not yet there
 		v=float("-inf")
 		best_move = valid_moves[0]
 		for move in valid_moves:
-			row=get_next_empty_row(board,move)
 			tempBoard=copy.deepcopy(board)
-			make_move(tempBoard,2,row,move)
+			make_move(tempBoard,2,move)
 			# print(temp_board5)
 			board_score = mini_max(tempBoard, depth-1,2)[1]
 			if board_score> v:
@@ -416,9 +403,8 @@ def mini_max(board, depth, player_type):#almost done not yet there
 		v=float("inf")
 		best_move = valid_moves[0]
 		for move in valid_moves:
-			row=get_next_empty_row(board,move)
 			tempBoard=copy.deepcopy(board)
-			make_move(tempBoard,1,row,move)
+			make_move(tempBoard,1,move)
 			# print(temp_board5)
 			board_score = mini_max(tempBoard, depth-1,1)[1]
 			if board_score> v:
