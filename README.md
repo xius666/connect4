@@ -14,4 +14,3 @@ command line option:
 
 "-MINI":not yet finished minimax AI player
 
-first commit in this project also contains yanlin's work
