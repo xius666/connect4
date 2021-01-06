@@ -12,5 +12,8 @@ command line option:
 
 "-AI2":second version of AI (look ahead two steps ahead(strong))
 
-"-MINI":not yet finished minimax AI player
+
+
+video demo: https://www.youtube.com/watch?v=SaaQvBEB0Gs&feature=y
+outu.be
 
