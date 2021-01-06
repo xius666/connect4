@@ -14,6 +14,5 @@ command line option:
 
 
 
-video demo: https://www.youtube.com/watch?v=SaaQvBEB0Gs&feature=y
-outu.be
+video demo: https://www.youtube.com/watch?v=SaaQvBEB0Gs&feature=youtu.be
 
